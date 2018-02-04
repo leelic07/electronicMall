@@ -9,7 +9,11 @@
         <div class="filter-nav">
           <span class="sortby">Sort by:</span>
           <a href="javascript:void(0)" class="default cur">Default</a>
-          <a href="javascript:void(0)" class="price">Price <svg class="icon icon-arrow-short"><use xlink:href="#icon-arrow-short"></use></svg></a>
+          <a href="javascript:void(0)" class="price" @click="sortGoods($event)">Price
+            <svg class="icon icon-arrow-short">
+              <use xlink:href="#icon-arrow-short"></use>
+            </svg>
+          </a>
           <a href="javascript:void(0)" class="filterby stopPop">Filter by</a>
         </div>
         <div class="accessory-result">
@@ -28,13 +32,13 @@
           <div class="accessory-list-wrap">
             <div class="accessory-list col-4">
               <ul>
-                <li v-for="(item,index) in goodsList">
+                <li v-for="item,index in goodsList">
                   <div class="pic">
-                    <a href="#"><img :src="'../../static/' + item.productImg" alt=""></a>
+                    <a href="#"><img :src="'../../static/' + item.productImage" alt=""></a>
                   </div>
                   <div class="main">
                     <div class="name" v-text="item.productName"></div>
-                    <div class="price" v-text="item.productPrice"></div>
+                    <div class="price" v-text="item.salePrice"></div>
                     <div class="btn-area">
                       <a href="javascript:;" class="btn btn--m">加入购物车</a>
                     </div>
@@ -60,24 +64,31 @@
   export default {
     data() {
       return {
-        goodsList:[]
+        goodsList: [],
+        page: 1,
+        pageSize: 8,
+        sortFlag: true
       }
     },
-    methods:{
+    methods: {
       getGoodsList(){
-        axios.get('/mock/goods.json').then(res => {
-            if(res.data.status == 0){
-                this.goodsList = res.data.results;
-            }
-        }).catch(err => {
-            console.log(err);
-        })
+        axios.get('/mall/goods', {
+          params: {
+            page: this.page,
+            pageSize: this.pageSize,
+            sort: this.sortFlag ? 1 : -1
+          }
+        }).then(res => res.data.status === 0 && (this.goodsList = res.data.result.list)).catch(err => console.log(err))
+      },
+      sortGoods(e){
+        e.preventDefault();
+        this.sortFlag = !this.sortFlag;
       }
     },
     mounted(){
       this.getGoodsList()
     },
-    components:{
+    components: {
       NavHeader,
       NavBread,
       NavFooter
