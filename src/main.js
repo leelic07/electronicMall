@@ -4,11 +4,11 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import axios from 'axios'
-
-axios.defaults.baseURL = 'http://localhost:8080'
+import infiniteScroll from 'vue-infinite-scroll'
+// axios.defaults.baseURL = 'http://localhost:3000';
 
 Vue.config.productionTip = false
-
+Vue.use(infiniteScroll)
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
