@@ -21,10 +21,8 @@
           <div class="filter stopPop" id="filter">
             <dl class="filter-price">
               <dt>Price:</dt>
-              <dd><a href="javascript:void(0)">All</a></dd>
-              <dd>
-                <a href="javascript:void(0)">0 - 100</a>
-              </dd>
+              <dd v-for="item,key in priceFilter"><a href="javascript:void(0)"
+                                                     @click="selectPriceLevel(item)">{{key}}</a></dd>
             </dl>
           </div>
 
@@ -71,7 +69,15 @@
         page: 1,
         pageSize: 8,
         sortFlag: true,
-        busy: true
+        busy: true,
+        priceLevel: 'all',
+        priceFilter: {
+          'All': 'all',
+          '0 - 100': 1,
+          '100 - 500': 2,
+          '500 - 1000': 3,
+          '1000 - 5000': 4
+        }
       }
     },
     methods: {
@@ -80,7 +86,8 @@
           params: {
             page: this.page,
             pageSize: this.pageSize,
-            sort: this.sortFlag ? 1 : -1
+            sort: this.sortFlag ? 1 : -1,
+            priceLevel: this.priceLevel
           }
         }).then(res => {
           if (res.data.status === 0) {
@@ -108,6 +115,12 @@
           this.page++;
           this.getGoodsList(true);
         }, 1000);
+      },
+      selectPriceLevel(priceLevel){
+        this.priceLevel = priceLevel;
+        this.page = 1;
+        this.pageSize = 8;
+        this.getGoodsList(false);
       }
     },
     mounted(){
