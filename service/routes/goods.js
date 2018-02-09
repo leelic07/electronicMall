@@ -5,7 +5,7 @@ let express = require('express');
 let router = express.Router();
 let mongoose = require('mongoose');
 let Goods = require('../models/goods');
-
+let User = require('../models/users');
 //连接mongodb
 mongoose.connect('mongodb://localhost/dumall');
 
@@ -148,6 +148,88 @@ router.get('/', (req, res, next) => {
           list: docs
         }
       });
+  });
+});
+
+router.post('/addCart', (req, res, next) => {
+  // User.insertMany([{
+  //   userId: '100000077',
+  //   userName: 'lcc',
+  //   userPwd: '123456',
+  //   orderList: [],
+  //   cartList: [],
+  //   addressList: []
+  // }, {
+  //   userId: '100000078',
+  //   userName: 'ccl',
+  //   userPwd: '123456',
+  //   orderList: [],
+  //   cartList: [],
+  //   addressList: []
+  // }, {
+  //   userId: '100000079',
+  //   userName: 'lcl',
+  //   userPwd: '123456',
+  //   orderList: [],
+  //   cartList: [],
+  //   addressList: []
+  // }], (err, docs) => {
+  //   !err && console.log(docs);
+  // });
+
+  let userId = '100000077', productId = req.body.productId;
+  User.findOne({userId: userId}, (err, user) => {
+    if (err) res.json({
+      status: '1',
+      msg: err.message
+    });
+    else if (!err)
+      user && Goods.findOne({productId: productId}, (err, goods) => {
+        if (err) res.json({
+          status: '1',
+          msg: err.message
+        });
+        else if (!err) {
+          let goodItem;
+          user.cartList.forEach(good => good.productId === productId && good.productNum++ && (goodItem = good));
+          if (goodItem)
+            user.save(err => {
+              if (err) res.json({
+                status: '1',
+                msg: err.message
+              });
+              else if (!err)
+                res.json({
+                  status: '0',
+                  msg: '',
+                  result: 'success'
+                });
+            });
+          else if (!goodItem) {
+            goods.productNum = 1;
+            goods.checked = '1';
+            user.cartList.push(goods);
+            user.save(err => {
+              if (err) res.json({
+                status: '1',
+                msg: err.message
+              });
+              else if (!err)
+                res.json({
+                  status: '0',
+                  msg: '',
+                  result: 'success'
+                });
+            });
+          } else res.json({
+            status: '1',
+            msg: '未找到对应商品！'
+          });
+        }
+      }) || res.json({
+        status: '1',
+        msg: '未找到对应用户！'
+      })
   });
 });
 
