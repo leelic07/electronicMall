@@ -22,33 +22,93 @@
           <!--<a href="/" class="navbar-link">我的账户</a>-->
           <span class="navbar-link"></span>
           <a href="javascript:void(0)" class="navbar-link" v-if="userName">{{userName}}</a>
-          <a href="javascript:void(0)" class="navbar-link" @click="$emit('showLogin')" v-else>Login</a>
-          <a href="javascript:void(0)" class="navbar-link">Logout</a>
+          <a href="javascript:void(0)" class="navbar-link" @click="dialogFormVisible = true" v-else>Login</a>
+          <a href="javascript:void(0)" class="navbar-link" @click="confirmLogout">Logout</a>
           <div class="navbar-cart-container">
             <span class="navbar-cart-count"></span>
-            <a class="navbar-link navbar-cart-link" href="/#/cart">
-              <svg class="navbar-cart-logo">
-                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-cart"></use>
-              </svg>
+            <a class="el-icon-goods" href="/#/cart">
+              <!--<svg class="navbar-cart-logo">-->
+              <!--<use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-cart"></use>-->
+              <!--</svg>-->
             </a>
           </div>
         </div>
       </div>
     </div>
+    <el-dialog title="收货地址" :visible.sync="dialogFormVisible">
+      <el-form :model="form" :rules="rules" ref="loginForm">
+        <el-form-item label="用户名" label-width="80px" prop="userName">
+          <el-input v-model="form.userName" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="密码" label-width="80px" prop="userPwd">
+          <el-input type="password" v-model="form.userPwd" auto-complete="off" @keyup.enter="login"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="login">确 定</el-button>
+      </div>
+    </el-dialog>
   </header>
 </template>
 
 <script type="text/ecmascript-6">
+  import axios from 'axios'
+  import qs from 'qs'
   export default {
-    props: {
-      userName: String
-    },
     data() {
-      return {}
+      return {
+        dialogFormVisible: false,
+        userName: '', //登录的用户名
+        form: {
+          userName: '',
+          userPwd: ''
+        },
+        rules: {
+          userName: {required: true, message: '用户名不能为空', trigger: 'blur'},
+          userPwd: {required: true, message: '用户密码不能为空', trigger: 'blur'}
+        }
+      }
+    },
+    methods: {
+      login(){
+        this.$refs.loginForm.validate(valid => {
+          if (valid) axios.post('/mall/users/login', qs.stringify({
+            userName: this.form.userName,
+            userPwd: this.form.userPwd
+          })).then(res => {
+            if (res.data.status === '0') {
+              this.dialogFormVisible = false;
+              this.userName = res.data.result.userName;
+              this.$message({
+                type: 'success',
+                message: '登录成功！'
+              });
+            } else this.$message.error(res.data.msg);
+          }).catch(err => console.log(err));
+        });
+      },
+      confirmLogout(){
+        this.$confirm('确定退出登录？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          axios.post('/mall/users/logout').then(res => {
+            res.data.status === '0' && this.$message({
+              type: 'success',
+              message: res.data.msg
+            });
+          }).catch(err => console.log(err));
+        });
+      }
     }
   }
 </script>
 
 <style lang="stylus" type="text/stylus">
-
+  .navbar-cart-container
+    display: inline-block
+    a
+      display: inline-block
 </style>

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <NavHeader :userName="userName" @showLogin="showLogin"></NavHeader>
+    <NavHeader></NavHeader>
     <NavBread>
       <span>Goods</span>
     </NavBread>
@@ -70,20 +70,7 @@
         <router-link class="btn btn--m btn--red" href="javascript:;" to="/cart">查看购物车</router-link>
       </div>
     </modal>
-    <el-dialog title="收货地址" :visible.sync="dialogFormVisible">
-      <el-form :model="form" :rules="rules" ref="loginForm">
-        <el-form-item label="用户名" label-width="80px" prop="userName">
-          <el-input v-model="form.userName" auto-complete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="密码" label-width="80px" prop="userPwd">
-          <el-input type="password" v-model="form.userPwd" auto-complete="off"></el-input>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="login">确 定</el-button>
-      </div>
-    </el-dialog>
+
     <NavFooter></NavFooter>
   </div>
 </template>
@@ -115,16 +102,7 @@
         },
         loading: false,//控制显示加载loading
         mdShow: false,
-        mdShowCart: false,
-        dialogFormVisible: false,
-        form: {
-          userName: '',
-          userPwd: ''
-        },
-        rules: {
-          userName: {required: true, message: '用户名不能为空', trigger: 'blur'},
-          userPwd: {required: true, message: '用户密码不能为空', trigger: 'blur'}
-        }
+        mdShowCart: false
       }
     },
     methods: {
@@ -150,24 +128,6 @@
               this.busy = false;
           }
         }).catch(err => console.log(err))
-      },
-      login(){
-        this.$refs.loginForm.validate(valid => {
-          if (valid) axios.post('/mall/users/login', qs.stringify({
-            userName: this.form.userName,
-            userPwd: this.form.userPwd
-          })).then(res => {
-            if (res.data.status === '0') {
-              this.dialogFormVisible = false;
-              this.userName = res.data.result.userName;
-              this.$message({
-                type: 'success',
-                message: '登录成功！'
-              });
-            } else this.$message.error(res.data.msg);
-          }).catch(err => console.log(err));
-        });
-
       },
       sortGoods(e){
         e.preventDefault();
@@ -201,9 +161,6 @@
       closeModal(){
         this.mdShow = false;
         this.mdShowCart = false;
-      },
-      showLogin(){
-        this.dialogFormVisible = true;
       }
     },
     mounted(){
