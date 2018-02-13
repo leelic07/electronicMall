@@ -83,7 +83,7 @@
                   <div class="item-quantity">
                     <div class="select-self select-self-open">
                       <div class="select-self-area">
-                        <a class="input-sub" @click="editCart('minu',item)">-</a>
+                        <a class="input-sub" @click="editCart('minus',item)">-</a>
                         <span class="select-ipt">{{item.productNum}}</span>
                         <a class="input-add" @click="editCart('add',item)">+</a>
                       </div>
@@ -181,7 +181,7 @@
           if (item.checked == '1') {
             money += parseFloat(item.salePrice) * parseInt(item.productNum);
           }
-        })
+        });
         return money;
       }
     },
@@ -201,18 +201,63 @@
 
       },
       checkOut(){
-
+        if (this.checkedCount > 0)
+          this.$router.push({
+            path: '/address'
+          });
       },
       delCart(){
 
       },
-      editCart(){
-
+      editCart(flag, item){
+        switch (flag) {
+          case 'add':
+            item.productNum++;
+            break;
+          case 'minus':
+            if (item.productNum > 1) {
+              item.productNum--;
+            } else return '';
+            break;
+          case 'checked':
+            item.checked = item.checked === '0' ? '1' : '0';
+            break;
+          default:
+            break;
+        }
+        axios.post('/mall/users/editCart', {
+          productId: item.productId,
+          productNum: item.productNum,
+          checked: item.checked
+        }).then(response => {
+          let res = response.data;
+          console.log(res);
+        }).catch(err => console.log(err));
       },
       closeModal(){
 
       },
-
+      delCartConfirm(item){
+        this.$confirm("确定删除商品？", "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: 'warning'
+        }).then(() => {
+          axios.post('/mall/users/cartDel', {
+            productId: item.productId
+          }).then(response => {
+            let res = response.data;
+            if (res.status === '0') {
+              this.$message({
+                type: 'success',
+                message: res.msg
+              });
+              this.init();
+            }
+            else this.$message.error('删除失败！');
+          }).catch(err => console.log(err));
+        }).catch(err => console.log(err));
+      }
     }
   }
 </script>

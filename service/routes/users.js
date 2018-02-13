@@ -69,4 +69,51 @@ router.get('/cartList', (req, res, next) => {
   });
 });
 
+//删除商品接口
+router.post('/cartDel', (req, res, next) => {
+  let userId = req.cookies.userId;
+  let productId = req.body.productId;
+  User.update({userId: userId}, {
+    $pull: {
+      cartList: {
+        productId: productId
+      }
+    }
+  }, (err, doc) => {
+    if (err) res.json({
+      status: '1',
+      msg: err.message,
+      result: ''
+    });
+    else res.json({
+      status: '0',
+      msg: '删除商品成功！',
+      result: ''
+    });
+  });
+});
+
+//编辑商品接口
+router.post('/editCart', (req, res, next) => {
+  let userId = req.cookies.userId,
+    productId = req.body.productId,
+    productNum = req.body.productNum,
+    checked = req.body.checked;
+  User.update({userId: userId, 'cartList.productId': productId}, {
+    'cartList.$.productNum': productNum,
+    'cartList.$.checked': checked
+  }, (err, doc) => {
+    if (err) res.json({
+      status: '1',
+      msg: '编辑商品数量失败',
+      result: ''
+    });
+    else res.json({
+      status: '0',
+      msg: '编辑商品成功',
+      result: ''
+    });
+  });
+});
+
 module.exports = router;

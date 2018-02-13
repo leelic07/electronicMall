@@ -108,7 +108,7 @@
     methods: {
       getGoodsList(flag){
         this.loading = true;
-        axios.get('/mall/goods', {
+        axios.get('/mall/goods/list', {
           params: {
             page: this.page,
             pageSize: this.pageSize,
@@ -153,9 +153,9 @@
           productId: productId
         })).then(res => {
           if (res.data.status === '0')
-            alert('添加商品成功！');
+            this.mdShowCart = true;
           else
-            alert('添加商品失败！' + res.data.msg);
+            this.mdShow = true;
         }).catch(err => console.log(err));
       },
       closeModal(){

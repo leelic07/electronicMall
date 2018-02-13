@@ -14,7 +14,7 @@ mongoose.connection.on('error', () => console.log('mongoose has been error'));
 mongoose.connection.on('disconnected', () => console.log('mongoose has been disconnected'));
 
 //查询商品列表数据
-router.get('/', (req, res, next) => {
+router.get('/list', (req, res, next) => {
   // Goods.remove((err, docs) => {
   //   console.log(docs);
   // });

@@ -27,7 +27,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(function (req, res, next) {
   if (req.cookies.userId) next();
   else {
-    if (req.originalUrl === '/users/login' || req.originalUrl === '/users/logout' || req.originalUrl.indexOf('/goods') > -1) next();
+    if (req.originalUrl === '/users/login' || req.originalUrl === '/users/logout' || req.originalUrl.indexOf('/goods/list') > -1) next();
     else res.json({
       status: '1',
       msg: '未登录，请先登录！',
