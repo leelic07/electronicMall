@@ -111,11 +111,11 @@
           <div class="addr-list-wrap">
             <div class="addr-list">
               <ul>
-                <li>
+                <li v-for="item in addressList">
                   <dl>
-                    <dt>Jack</dt>
-                    <dd class="address">海淀区朝阳公园</dd>
-                    <dd class="tel">18610000000</dd>
+                    <dt>{{item.userName}}</dt>
+                    <dd class="address">{{item.streetName}}</dd>
+                    <dd class="tel">{{item.tel}}</dd>
                   </dl>
                   <div class="addr-opration addr-del">
                     <a href="javascript:;" class="addr-del-btn">
@@ -226,9 +226,31 @@
 </template>
 
 <script>
+  import NavHeader from './../components/Header'
+  import NavFooter from './../components/Footer'
+  import NavBread from './../components/Bread'
+  import Modal from './../components/Modal'
+  import {currency} from './../util/currency.js'
+  import axios from 'axios'
+  import '../assets/css/checkout.css'
   export default{
     data(){
-      return {}
+      return {
+        addressList: []
+      }
+    },
+    methods: {
+      init(){
+        axios.get('/mall/users/addressList').then(response => {
+          let res = response.data;
+          if (res.status === '0')
+            this.addressList = res.result;
+//          else this.$message.error(res.msg);
+        }).catch(err => console.log(err));
+      }
+    },
+    mounted(){
+      this.init();
     }
   }
 </script>

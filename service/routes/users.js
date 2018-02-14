@@ -116,4 +116,21 @@ router.post('/editCart', (req, res, next) => {
   });
 });
 
+//查询地址列表功能
+router.get('/addressList', (req, res, next) => {
+  let userId = req.cookies.userId;
+  User.findOne({userId: userId}, (err, docs) => {
+    if (err) res.json({
+      status: '1',
+      msg: err.message,
+      result: ''
+    });
+    else res.json({
+      status: '1',
+      msg: '',
+      result: docs.addressList
+    });
+  });
+});
+
 module.exports = router;
