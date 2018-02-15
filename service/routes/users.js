@@ -126,11 +126,109 @@ router.get('/addressList', (req, res, next) => {
       result: ''
     });
     else res.json({
-      status: '1',
+      status: '0',
       msg: '',
       result: docs.addressList
     });
   });
+  // User.findOne((err, doc) => {
+  //   if (!err) {
+  //     doc.userId = '1000077';
+  //     doc.userName = 'lcc';
+  //     doc.userPwd = '123456';
+  //     doc.addressList = [{
+  //       addressId: '1001',
+  //       userName: 'lcc',
+  //       streetName: '芙蓉北路',
+  //       postCode: 410006,
+  //       tel: 18645738234,
+  //       isDefault: false
+  //     }, {
+  //       addressId: '1002',
+  //       userName: 'lcc',
+  //       streetName: '劳动西路',
+  //       postCode: 410005,
+  //       tel: 18645738234,
+  //       isDefault: true
+  //     }, {
+  //       addressId: '1003',
+  //       userName: 'lcc',
+  //       streetName: '侯家塘',
+  //       postCode: 410007,
+  //       tel: 18645738234,
+  //       isDefault: false
+  //     }, {
+  //       addressId: '1004',
+  //       userName: 'lcc',
+  //       streetName: '曙光中路',
+  //       postCode: 410008,
+  //       tel: 18645738234,
+  //       isDefault: false
+  //     }];
+  //     doc.save((err, doc) => {
+  //       !err && console.log(doc);
+  //     })
+  //   }
+  // });
+});
+
+//设置默认的收获地址
+router.post('/setDefault', (req, res, next) => {
+  let userId = req.cookies.userId,
+    addressId = req.body.addressId;
+  User.findOne({userId: userId}, (err, doc) => {
+    if (err) res.json({
+      status: '1',
+      msg: err.message,
+      result: ''
+    });
+    else {
+      doc.addressList.forEach(item => {
+        item.addressId === addressId && (item.isDefault = true) || (item.isDefault = false);
+      });
+      doc.save((err, doc) => {
+        if (err) res.json({
+          status: '1',
+          msg: '设置默认地址失败',
+          result: ''
+        });
+        else res.json({
+          status: '0',
+          msg: '设置默认地址成功',
+          result: ''
+        });
+      });
+    }
+  })
+});
+
+//删除地址接口
+router.post('/delAddress', (req, res, next) => {
+  let userId = req.cookies.userId,
+    addressId = req.body.addressId;
+  if (!addressId) res.json({
+    status: '1',
+    msg: '收件地址id不能为空',
+    result: ''
+  });
+  else User.update({userId: userId}, {
+    $pull: {
+      addressList: {
+        addressId: addressId
+      }
+    }
+  }, (err, doc) => {
+    if (err) res.json({
+      status: '1',
+      msg: err.message,
+      result: ''
+    });
+    else res.json({
+      status: '0',
+      msg: '删除收件地址成功',
+      result: ''
+    });
+  })
 });
 
 module.exports = router;

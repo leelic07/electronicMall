@@ -95,6 +95,10 @@ router.get('/list', (req, res, next) => {
   //   console.log(docs);
   // });
 
+  // Goods.updateMany({productName: '小米笔记本'}, {productImage: 'note.jpg'}, (err, doc) => {
+  //   !err && console.log(doc);
+  // });
+
   let page = parseInt(req.param('page'));
   let pageSize = parseInt(req.param('pageSize'));
   let skip = (page - 1) * pageSize;
@@ -177,7 +181,7 @@ router.post('/addCart', (req, res, next) => {
   //   !err && console.log(docs);
   // });
 
-  let userId = '100000077', productId = req.body.productId;
+  let userId = req.cookies.userId, productId = req.body.productId;
   User.findOne({userId: userId}, (err, user) => {
     if (err) res.json({
       status: '1',
