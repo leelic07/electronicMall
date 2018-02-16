@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 let User = require('../models/users');
+require('../util/util');
 /* GET users listing. */
 router.get('/', function (req, res, next) {
   res.send('respond with a resource');
@@ -229,6 +230,98 @@ router.post('/delAddress', (req, res, next) => {
       result: ''
     });
   })
+});
+
+//生成订单接口
+router.post('/payment', (req, res, next) => {
+  let userId = req.cookies.userId,
+    orderTotal = req.body.orderTotal,
+    addressId = req.body.addressId;
+  User.findOne({userId: userId}, (err, doc) => {
+    if (err) res.json({
+      status: '1',
+      msg: err.message,
+      result: ''
+    });
+    else {
+      if (doc) {
+        //获取用户的地址信息
+        let address;
+        doc.addressList.forEach(item => item.addressId === addressId && (address = item));
+        //获取用户的商品订单信息
+        let goodsList = doc.cartList.filter(item => item.checked === '1');
+
+        let platCode = '622';
+        let r1 = ~~(Math.random() * 10);
+        let r2 = ~~(Math.random() * 10);
+        let sysTime = new Date().Format('yyyyMMddhhmmss');
+        let createDate = new Date().Format('yyyy-MM-dd hh:mm:ss');
+        let orderId = `${platCode}${r1}${sysTime}${r2}`;
+        let order = {
+          orderId: orderId,
+          orderTotal: orderTotal,
+          orderStatus: '1',
+          addressInfo: address,
+          goodsList: goodsList,
+          createDate: createDate
+        };
+        doc.orderList.push(order);
+        doc.save((err, doc) => {
+          if (err) res.json({
+            status: '1',
+            msg: err.message,
+            result: ''
+          });
+          else res.json({
+            status: '0',
+            msg: '生成订单成功',
+            result: {
+              orderTotal: orderTotal,
+              orderId: orderId
+            }
+          });
+        });
+      }
+    }
+  })
+});
+
+//查询订单信息
+router.get('/orderDetail', (req, res, next) => {
+  let userId = req.cookies.userId,
+    orderId = req.param('orderId');
+  User.findOne({userId: userId}, (err, doc) => {
+    if (err) res.json({
+      status: '1',
+      msg: err.message,
+      result: ''
+    });
+    else {
+      if (orderId) {
+        let order = doc.orderList.find(item => item.orderId === orderId);
+        if (order) res.json({
+          status: '0',
+          msg: '查询订单成功',
+          result: {
+            orderId: order.orderId,
+            orderTotal: order.orderTotal
+          }
+        });
+        else res.json({
+          status: '120001',
+          msg: '无此订单',
+          result: {
+            orderId: '',
+            orderTotal: ''
+          }
+        });
+      } else res.json({
+        status: '120002',
+        msg: '请提供查询的订单号',
+        result: ''
+      });
+    }
+  });
 });
 
 module.exports = router;

@@ -125,7 +125,7 @@
             <router-link class="btn btn--m" to="/address">Previous</router-link>
           </div>
           <div class="next-btn-wrap">
-            <button class="btn btn--m btn--red" @click="payMent">Proceed to payment</button>
+            <button class="btn btn--m btn--red" @click="payment">Proceed to payment</button>
           </div>
         </div>
       </div>
@@ -186,7 +186,22 @@
           }
         }).catch(err => console.log(err));
       },
-      payMent(){
+      payment(){
+        axios.post('/mall/users/payment', {
+          addressId: this.$route.query.addressId,
+          orderTotal: this.orderTotal
+        }).then(response => {
+          let res = response.data;
+          if (res.status === '0') {
+            this.$message({
+              type: 'success',
+              message: res.msg
+            });
+            this.$router.push({
+              path: `/orderSuccess?orderId=${res.result.orderId}`
+            });
+          }
+        }).catch(err => console.log(err));
       }
     }
   }
