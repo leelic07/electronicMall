@@ -324,4 +324,53 @@ router.get('/orderDetail', (req, res, next) => {
   });
 });
 
+//检查登录的用户名
+router.get('/checkLogin', (req, res, next) => {
+  let userId = req.cookies.userId;
+  User.findOne({userId: userId}, (err, doc) => {
+    if (err) res.json({
+      status: '1',
+      msg: err.message,
+      result: ''
+    });
+    else {
+      if (doc) res.json({
+        status: '0',
+        msg: '查询用户成功',
+        result: {
+          userName: doc.userName
+        }
+      });
+      else res.json({
+        status: '1',
+        msg: '无此用户',
+        result: ''
+      });
+    }
+  });
+});
+
+//获取对应用户的购物车的商品数量
+router.get('/cartCount', (req, res, next) => {
+  let userId = req.cookies.userId;
+  User.findOne({userId: userId}, (err, doc) => {
+    if (err) res.json({
+      status: '1',
+      msg: err.message,
+      result: ''
+    });
+    else {
+      let cartCount = 0;
+      doc.cartList.forEach(item => cartCount += Number(item.productNum));
+      res.json({
+        status: '0',
+        msg: '查询用户商品数量成功',
+        result: {
+          cartCount: cartCount
+        }
+      });
+    }
+  });
+});
+
 module.exports = router;

@@ -25,11 +25,11 @@
           <a href="javascript:void(0)" class="navbar-link" @click="dialogFormVisible = true" v-else>Login</a>
           <a href="javascript:void(0)" class="navbar-link" @click="confirmLogout">Logout</a>
           <div class="navbar-cart-container">
-            <span class="navbar-cart-count"></span>
-            <a class="el-icon-goods" href="/#/cart">
-              <!--<svg class="navbar-cart-logo">-->
-              <!--<use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-cart"></use>-->
-              <!--</svg>-->
+            <span class="navbar-cart-count">{{cartCount}}</span>
+            <a href="/#/cart">
+              <svg class="navbar-cart-logo">
+                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-cart"></use>
+              </svg>
             </a>
           </div>
         </div>
@@ -55,11 +55,12 @@
 <script type="text/ecmascript-6">
   import axios from 'axios'
   import qs from 'qs'
+  import {mapGetters, mapMutations} from 'vuex'
   export default {
     data() {
       return {
         dialogFormVisible: false,
-        userName: '', //登录的用户名
+//        userName: '', //登录的用户名
         form: {
           userName: '',
           userPwd: ''
@@ -70,21 +71,33 @@
         }
       }
     },
+    computed: {
+      ...mapGetters({
+        userName: 'userName',
+        cartCount: 'cartCount'
+      })
+    },
     methods: {
+      ...mapMutations({
+        updateUserNameInfo: 'updateUserNameInfo',
+        updateCartCountInfo: 'updateCartCountInfo'
+      }),
       login(){
         this.$refs.loginForm.validate(valid => {
           if (valid) axios.post('/mall/users/login', qs.stringify({
             userName: this.form.userName,
             userPwd: this.form.userPwd
-          })).then(res => {
-            if (res.data.status === '0') {
+          })).then(response => {
+            let res = response.data;
+            if (res.status === '0') {
               this.dialogFormVisible = false;
-              this.userName = res.data.result.userName;
+              this.updateUserNameInfo(res.result.userName);
               this.$message({
                 type: 'success',
                 message: '登录成功！'
               });
-            } else this.$message.error(res.data.msg);
+
+            } else this.$message.error(res.msg);
           }).catch(err => console.log(err));
         });
       },
@@ -94,14 +107,34 @@
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          axios.post('/mall/users/logout').then(res => {
-            res.data.status === '0' && this.$message({
-              type: 'success',
-              message: res.data.msg
-            });
+          axios.post('/mall/users/logout').then(response => {
+            let res = response.data;
+            if (res.status === '0') {
+              this.$message({
+                type: 'success',
+                message: res.msg
+              });
+              this.updateUserNameInfo('');
+            }
           }).catch(err => console.log(err));
         });
+      },
+      checkLogin(){
+        axios.get('/mall/users/checkLogin').then(response => {
+          let res = response.data;
+          if (res.status === '0') this.updateUserNameInfo(res.result.userName);
+        }).catch(err => console.log(err));
+      },
+      getCartCount(){
+        axios.get('/mall/users/cartCount').then(response => {
+          let res = response.data;
+          if (res.status === '0') this.updateCartCountInfo(res.result.cartCount);
+        }).catch(err => console.log(err));
       }
+    },
+    mounted(){
+      this.checkLogin();
+      this.getCartCount();
     }
   }
 </script>
