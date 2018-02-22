@@ -25,7 +25,7 @@
           <a href="javascript:void(0)" class="navbar-link" @click="dialogFormVisible = true" v-else>Login</a>
           <a href="javascript:void(0)" class="navbar-link" @click="confirmLogout">Logout</a>
           <div class="navbar-cart-container">
-            <span class="navbar-cart-count">{{cartCount}}</span>
+            <span class="navbar-cart-count" v-if="cartCount">{{cartCount}}</span>
             <a href="/#/cart">
               <svg class="navbar-cart-logo">
                 <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-cart"></use>
@@ -80,7 +80,8 @@
     methods: {
       ...mapMutations({
         updateUserNameInfo: 'updateUserNameInfo',
-        updateCartCountInfo: 'updateCartCountInfo'
+        updateCartCountInfo: 'updateCartCountInfo',
+        initCartCountInfo: 'initCartCountInfo'
       }),
       login(){
         this.$refs.loginForm.validate(valid => {
@@ -128,7 +129,10 @@
       getCartCount(){
         axios.get('/mall/users/cartCount').then(response => {
           let res = response.data;
-          if (res.status === '0') this.updateCartCountInfo(res.result.cartCount);
+          if (res.status === '0') {
+            this.initCartCountInfo();
+            this.updateCartCountInfo(res.result.cartCount);
+          }
         }).catch(err => console.log(err));
       }
     },

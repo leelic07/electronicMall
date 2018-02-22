@@ -84,6 +84,7 @@
   import NavFooter from '@/components/Footer.vue'
   import Modal from '@/components/Modal.vue'
   import qs from 'qs'
+  import {mapMutations} from 'vuex'
   export default {
     data() {
       return {
@@ -106,6 +107,9 @@
       }
     },
     methods: {
+      ...mapMutations({
+        updateCartCountInfo: 'updateCartCountInfo'
+      }),
       getGoodsList(flag){
         this.loading = true;
         axios.get('/mall/goods/list', {
@@ -152,10 +156,10 @@
         axios.post('/mall/goods/addCart', qs.stringify({
           productId: productId
         })).then(res => {
-          if (res.data.status === '0')
+          if (res.data.status === '0') {
             this.mdShowCart = true;
-          else
-            this.mdShow = true;
+            this.updateCartCountInfo(1);
+          } else this.mdShow = true;
         }).catch(err => console.log(err));
       },
       closeModal(){
